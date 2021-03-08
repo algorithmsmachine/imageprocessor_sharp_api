@@ -1,4 +1,4 @@
-var express = require('express'),
+const express = require('express'),
     Path = require('path'),
     bodyparser = require('body-parser'),
     swaggerJsdoc = require("swagger-jsdoc"),
@@ -6,14 +6,13 @@ var express = require('express'),
     fs = require('fs'),
     HttpStatus = require('http-status-codes'),
     formidable = require('formidable');
-
 const {v4: uuidv4} = require('uuid');
-var lib = require('./lib/processImage.js'),
+const lib = require('./lib/processImage.js'),
     app = express();
 app.use(bodyparser.urlencoded({extended: true}))
 
 app.use( (req, res, next)=> {
-    console.log('Time:', Date.now());
+    console.log('Time:', Date.now(), req.method, );
     next(); //call the next function on the chain
 });
 
@@ -129,8 +128,8 @@ app.post('/image', (req, res) => {
         }
 
         // get the uploaded form
-        var imgfile;
-        var form = new formidable.IncomingForm().parse(req, (err, fields, files) => {
+        let imgfile;
+        const form = new formidable.IncomingForm().parse(req, (err, fields, files) => {
             if (err) {
                 console.error('Error in reading incoming form - ', err);
                 throw err;
@@ -150,8 +149,8 @@ app.post('/image', (req, res) => {
                 throw err;
             })
             .on('progress', function (bytesReceived, bytesExpected) {
-                //self.emit('progess', bytesReceived, bytesExpected)
-                var percent = (bytesReceived / bytesExpected * 100) | 0;
+                // self.emit('progess', bytesReceived, bytesExpected)
+                const percent = (bytesReceived / bytesExpected * 100) | 0;
                 console.log('Uploading: %' + percent + '\r');
             })
             .on('end', () => {
@@ -159,6 +158,7 @@ app.post('/image', (req, res) => {
                     return res.status(HttpStatus.BAD_REQUEST).send('Missing required attributes- image file');
                 }
                 console.log('Uploaded File - ', imgfile.name );
+                imgfile.uuid = uuidv4();
                 imgfile.serverpath = 'image/' + imgfile.name;
                 imgfile.processedpath = 'processedimage/' + imgfile.name;
                 fs.rename(imgfile.path, imgfile.serverpath, function (err) {
