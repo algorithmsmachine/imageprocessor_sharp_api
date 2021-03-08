@@ -1,24 +1,31 @@
 {
-  "name": "imageprocessor_api",
+  "name": "imageprocessor_sharp_api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Performs operations - Flip horizontal and vertical - Rotate +/- n degrees  - Convert to grayscale  - Resize - Generate a thumbnail - Rotate left - Rotate right",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
-  "author": "",
+  "author": "altanai",
   "license": "BSD-3-Clause",
   "dependencies": {
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "formidable": "^1.2.2",
-    "gm": "^1.23.1",
-    "hijackresponse": "^5.0.0",
     "http-status-codes": "^2.1.4",
     "httperrors": "^2.3.0",
-    "impro": "^0.9.0",
-    "multer": "^1.4.2",
     "sharp": "^0.27.2",
+    "swagger-jsdoc": "6.0.0",
+    "swagger-ui-express": "^4.1.6",
     "uuid": "^8.3.2"
-  }
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "image",
+    "processor"
+  ]
 }
