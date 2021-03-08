@@ -12,12 +12,20 @@ var lib = require('./lib/processImage.js'),
     app = express();
 app.use(bodyparser.urlencoded({extended: true}))
 
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.append('subject', 'CPSC-5200');
+    next();
+});
+
 const options = {
     definition: {
         // swagger: "2.0",
         openapi: '3.0.0',
         info: {
-            title: "Image Processorr",
+            title: "Image Processor",
             version: "0.1.0",
             description:
                 "This is a image processor API application made with Express and documented with Swagger",
@@ -46,7 +54,7 @@ const specs = swaggerJsdoc(options);
  * /image:
  *   post:
  *     summary: Processes an Image
- *     description: Uoloads an Image system, processes it according to set of argumentd and returns
+ *     description: Uploads an Image system, processes it according to set of arguments and returns
  *     consumes:
  *       - multipart/form-data
  *     parameters:
@@ -145,8 +153,7 @@ app.post('/image', (req, res) => {
                 if (!imgfile || imgfile.size <= 0 || !imgfile.type.includes("image")) {
                     return res.status(HttpStatus.BAD_REQUEST).send('Missing required attributes- image file');
                 }
-
-                console.log('Uploaded File - ', imgfile);
+                console.log('Uploaded File - ', imgfile.name );
                 imgfile.serverpath = 'image/' + imgfile.name;
                 imgfile.processedpath = 'processedimage/' + imgfile.name;
                 fs.rename(imgfile.path, imgfile.serverpath, function (err) {
