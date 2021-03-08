@@ -10,6 +10,11 @@ var lib = require('./lib/processImage.js'),
     app = express();
 app.use(bodyparser.urlencoded({extended: true}))
 
+app.use( (req, res, next)=> {
+    console.log('Time:', Date.now());
+    next(); //call the next function on the chain
+});
+
 app.post('/image', (req, res) => {
 
     try {
