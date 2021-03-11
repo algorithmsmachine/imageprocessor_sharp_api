@@ -17,8 +17,6 @@ Return the processed image and delete any server side copies of original and pro
 - Rotate left
 - Rotate right
 
-**Formats Supported**
-
 
 ## API usage 
 
@@ -45,7 +43,7 @@ curl -X POST -F  "image=@/home/altanai/Desktop/Altanai-Bisht1.jpg" --output  -i 
 100  147k  100 30661  100  117k  1575k  6163k --:--:-- --:--:-- --:--:-- 7352k
 ```
 
-## Solutuin Design 
+## Solution Design 
 
 The solution is built as a nodejs project using 
 

@@ -14,16 +14,18 @@ app.use(bodyparser.urlencoded({extended: true}))
 
 app.use((req, res, next) => {
     console.log('Time:', Date.now(), req.method,);
-    next(); //call the next function on the chain
+    next(); // call the next function on the chain
 });
 
-app.use(function (req, res, next) {
+
+app.use( (req, res, next) =>{
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
     res.append('subject', 'CPSC-5200');
     next();
 });
+
 
 const options = {
     definition: {
@@ -175,37 +177,20 @@ app.post('/image', (req, res) => {
 
                     fileh.isFileReady(imgfile.processedpath, (filename) => {
                         console.log('image resizing and manipulation is complete');
-
-                        // if (fs.existsSync(__dirname + "/" + filename)) {
-                            res.status(201).sendFile(__dirname + "/" + filename);
-
-                            // res.end(() => {
-
-                                // console.log("End Processing, unlink stored files");
-                                // fs.unlinkSync(imgfile.serverpath, err => {
-                                //     if (err) console.error(err);
-                                //     console.log('File deleted!');
-                                // });
-                                fileh.deleteFile(imgfile.serverpath);
-                                fileh.deleteFile(imgfile.processedpath);
-
-                                // if (fs.existsSync(__dirname + "/" + imgfile.processedpath)) {
-                                //     fs.unlinkSync(imgfile.processedpath, err => {
-                                //         if (err) console.error(err);
-                                //         console.log('File deleted!');
-                                //     });
-                                // }
-                            // })
-                        // }
+                        res.status(201).sendFile(__dirname + "/" + filename);
+                        res.on('finish',()=>{
+                            console.log("End Processing, unlink stored files");
+                            fileh.deleteFile(imgfile.serverpath);
+                            fileh.deleteFile(imgfile.processedpath);
+                        })
                     });
+
                     // .on('finish', (err) => {
                     //     console.log("Finish Processing");
                     //     if (err) {
                     //         console.error(err);
                     //         res.status(500).send("Server Error");
                     //     }
-
-
                     // })
                     // .on('end', (err) => {
                     //     if (err)
