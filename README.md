@@ -43,6 +43,50 @@ curl -X POST -F  "image=@/home/altanai/Desktop/Altanai-Bisht1.jpg" --output  -i 
 100  147k  100 30661  100  117k  1575k  6163k --:--:-- --:--:-- --:--:-- 7352k
 ```
 
+## Sample outouot for one process 
+
+```shell
+Uploading: %0
+Uploading: %19
+Uploading: %22
+Uploading: %42
+Uploading: %61
+Uploading: %61
+Uploading: %81
+Uploading: %99
+Uploading: %100
+Received : file Name - _RAK7880.JPG Type -  image/jpeg 165945 /tmp/upload_86ee70ddc0100d1f81e51a519910b91a
+Uploaded File -  _RAK7880.JPG
+Transformer Oplist  [
+  { opname: 'resize', options: '200,400' },
+  { opname: 'greyscale', options: null },
+  { opname: 'fliphorizontal', options: null },
+  { opname: 'resize', options: '100' },
+  { opname: 'resize', options: '500' },
+  { opname: 'flipvertical', options: null },
+  { opname: 'end' }
+]
+Op   resize 200,400
+Op   greyscale null
+Op   fliphorizontal null
+Op   resize 100
+Op   resize 500
+Op   flipvertical null
+Op   end undefined
+Transformer Tofile {
+  format: 'jpeg',
+  width: 500,
+  height: 333,
+  channels: 3,
+  premultiplied: false,
+  size: 19377
+}
+File is ready processedimage/_RAK7880.JPG
+image resizing and manipulation is complete
+End Processing, unlink stored files
+
+```
+
 ## Solution Design 
 
 The solution is built as a nodejs project using 

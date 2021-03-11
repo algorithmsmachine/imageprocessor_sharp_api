@@ -18,7 +18,7 @@ app.use((req, res, next) => {
 });
 
 
-app.use( (req, res, next) =>{
+app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
@@ -106,24 +106,37 @@ const specs = swaggerJsdoc(options);
  *       500:
  *         description: Failed to create Object
  */
+
+const getQueryParams = (url) => {
+    let queryParams = {};
+    let params = url.split('&');
+    for (var i = 0; i < params.length; i++) {
+        var pair = params[i].split('=');
+        queryParams[pair[0]] = decodeURIComponent(pair[1]);
+    }
+    return queryParams;
+};
+
 app.post('/image', (req, res) => {
 
     try {
-        console.log('req.query', req.query);
         if (!req.query) {
             // return res.status(HttpStatus.BAD_REQUEST).send(new Error('Specify operation on to be processed in file such as resize , rotate, greyscale'));
             return res.status(HttpStatus.BAD_REQUEST).send('Specify operation on to be processed in file such as resize , rotate, greyscale');
         }
 
+        const query = (req.url.split('?'))[1];
+        // console.log('query', query); // do not req.query since it will overwrite if operation is used twice
+
+        const opqueryList = query.split('&');
+        // console.log('opqueryList', opqueryList);
+
         let oplist = [];
-        const opqueryList = req.query;
-        // Parse query strings
         try {
-            for (const x in opqueryList) {
-                var op = {};
-                op.opname = x;
-                op.options = opqueryList[x];
-                oplist.push(op);
+            for (x in opqueryList) {
+                console.log(opqueryList[x]);
+                var op = (opqueryList[x]).split("=");
+                oplist.push({opname: op[0], options: op[1] || null});
             }
             oplist.push({opname: "end"});
         } catch (err) {
@@ -178,7 +191,7 @@ app.post('/image', (req, res) => {
                     fileh.isFileReady(imgfile.processedpath, (filename) => {
                         console.log('image resizing and manipulation is complete');
                         res.status(201).sendFile(__dirname + "/" + filename);
-                        res.on('finish',()=>{
+                        res.on('finish', () => {
                             console.log("End Processing, unlink stored files");
                             fileh.deleteFile(imgfile.serverpath);
                             fileh.deleteFile(imgfile.processedpath);
