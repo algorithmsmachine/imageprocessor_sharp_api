@@ -6,6 +6,7 @@ const express = require('express'),
     fs = require('fs'),
     HttpStatus = require('http-status-codes'),
     formidable = require('formidable');
+const { check, oneOf, validationResult } = require('express-validator');
 const {v4: uuidv4} = require('uuid');
 const lib = require('./lib/processImage.js');
 const fileh = require('./lib/filehandler.js');
@@ -107,17 +108,27 @@ const specs = swaggerJsdoc(options);
  *         description: Failed to create Object
  */
 
-const getQueryParams = (url) => {
-    let queryParams = {};
-    let params = url.split('&');
-    for (var i = 0; i < params.length; i++) {
-        var pair = params[i].split('=');
-        queryParams[pair[0]] = decodeURIComponent(pair[1]);
-    }
-    return queryParams;
-};
 
-app.post('/image', (req, res) => {
+app.post('/image',
+    oneOf([
+        check('fliphorizontal').exists(),
+        check('flipvertical').exists(),
+        check('greyscale').exists(),
+        check('thumbnail').exists(),
+        check('rotate').exists(),
+        check('rotateleft').exists(),
+        check('rotateright').exists(),
+        check('resize').exists()
+    ], 'you must provide at least one of operations fliphorizontal , flipvertical, greyscale , thumbnail, rotate , rotateleft, rotateright or resize'),
+
+    (req, res) => {
+
+    const isvalid = validationResult(req);
+    console.log("validationresult ", isvalid);
+    if(isvalid.errors.length>0){
+        console.log("validationresult ", isvalid.errors);
+        return res.status(400).send(isvalid.errors[0].msg);
+    }
 
     try {
         if (!req.query) {
@@ -127,10 +138,8 @@ app.post('/image', (req, res) => {
 
         const query = (req.url.split('?'))[1];
         // console.log('query', query); // do not req.query since it will overwrite if operation is used twice
-
         const opqueryList = query.split('&');
         // console.log('opqueryList', opqueryList);
-
         let oplist = [];
         try {
             for (x in opqueryList) {
@@ -182,9 +191,8 @@ app.post('/image', (req, res) => {
                 fs.rename(imgfile.path, imgfile.serverpath, function (err) {
                     if (err) {
                         console.error("Error", err);
-                        res.status(500).send("Server Error");
+                        return res.status(500).send("Server Error");
                     }
-
 
                     lib.processImage(imgfile.serverpath, oplist, imgfile.processedpath);
 
@@ -197,25 +205,13 @@ app.post('/image', (req, res) => {
                             fileh.deleteFile(imgfile.processedpath);
                         })
                     });
-
-                    // .on('finish', (err) => {
-                    //     console.log("Finish Processing");
-                    //     if (err) {
-                    //         console.error(err);
-                    //         res.status(500).send("Server Error");
-                    //     }
-                    // })
-                    // .on('end', (err) => {
-                    //     if (err)
-                    //         console.error("Error on Processing end ", err);
-                    // });
                 });
             });
 
 
     } catch (error) {
         console.error(error);
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(new Error('Failed to create'));
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(new Error('Failed to create'));
     }
 })
 
