@@ -190,17 +190,17 @@ app.post('/image',
                 imgfile.processedpath = 'processedimage/' + imgfile.name;
                 fs.rename(imgfile.path, imgfile.serverpath, function (err) {
                     if (err) {
-                        console.error("Error", err);
-                        return res.status(500).send("Server Error");
+                        console.error( imgfile.uuid, 'Error in copy the file from tmp to spcific location ', err);
+                        throw err;
                     }
 
                     lib.processImage(imgfile.serverpath, oplist, imgfile.processedpath);
 
                     fileh.isFileReady(imgfile.processedpath, (filename) => {
-                        console.log('image resizing and manipulation is complete');
+                        console.log( imgfile.uuid , ' Image resizing and manipulation is complete');
                         res.status(201).sendFile(__dirname + "/" + filename);
                         res.on('finish', () => {
-                            console.log("End Processing, unlink stored files");
+                            console.log( imgfile.uuid, ' End Processing, unlink stored files');
                             fileh.deleteFile(imgfile.serverpath);
                             fileh.deleteFile(imgfile.processedpath);
                         })
@@ -208,10 +208,9 @@ app.post('/image',
                 });
             });
 
-
     } catch (error) {
         console.error(error);
-        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(new Error('Failed to create'));
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(new Error('Failed to process'));
     }
 })
 

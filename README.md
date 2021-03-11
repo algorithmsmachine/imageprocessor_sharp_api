@@ -129,6 +129,7 @@ Run Image
 docker run -p 3000:3000 -d altanai/imageprocessor-sharp-api
 ```
 
+
 Other operations on docker 
 ```shell
 # Get container ID
@@ -144,6 +145,7 @@ $ docker exec -it <container id> /bin/bash
 ## References 
 
 - sharp https://sharp.pixelplumbing.com/
-- Nodejs Streams 
+- Nodejs Streams
+- Express Validation https://express-validator.github.io/
 - Swagger https://swagger.io/docs/
 - Docker
