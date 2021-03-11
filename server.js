@@ -7,16 +7,17 @@ const express = require('express'),
     HttpStatus = require('http-status-codes'),
     formidable = require('formidable');
 const {v4: uuidv4} = require('uuid');
-const lib = require('./lib/processImage.js'),
-    app = express();
+const lib = require('./lib/processImage.js');
+const fileh = require('./lib/filehandler.js');
+const app = express();
 app.use(bodyparser.urlencoded({extended: true}))
 
-app.use( (req, res, next)=> {
-    console.log('Time:', Date.now(), req.method, );
+app.use((req, res, next) => {
+    console.log('Time:', Date.now(), req.method,);
     next(); //call the next function on the chain
 });
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
@@ -113,12 +114,14 @@ app.post('/image', (req, res) => {
         }
 
         let oplist = [];
-        let opqueryList = req.query;
-
+        const opqueryList = req.query;
         // Parse query strings
         try {
-            for (x in opqueryList) {
-                oplist.push({opname: x, options: opqueryList[x]})
+            for (const x in opqueryList) {
+                var op = {};
+                op.opname = x;
+                op.options = opqueryList[x];
+                oplist.push(op);
             }
             oplist.push({opname: "end"});
         } catch (err) {
@@ -157,7 +160,7 @@ app.post('/image', (req, res) => {
                 if (!imgfile || imgfile.size <= 0 || !imgfile.type.includes("image")) {
                     return res.status(HttpStatus.BAD_REQUEST).send('Missing required attributes- image file');
                 }
-                console.log('Uploaded File - ', imgfile.name );
+                console.log('Uploaded File - ', imgfile.name);
                 imgfile.uuid = uuidv4();
                 imgfile.serverpath = 'image/' + imgfile.name;
                 imgfile.processedpath = 'processedimage/' + imgfile.name;
@@ -166,39 +169,48 @@ app.post('/image', (req, res) => {
                         console.error("Error", err);
                         res.status(500).send("Server Error");
                     }
-                    lib.processImage(imgfile.serverpath, oplist, imgfile.processedpath)
-                        .on('finish', (err) => {
-                            console.log("Finish Processing");
-                            if (err) {
-                                console.error(err);
-                                res.status(500).send("Server Error");
-                            }
-                            if (fs.existsSync(__dirname + "/" + imgfile.processedpath)) {
-                                res.status(201).sendFile(__dirname + "/" + imgfile.processedpath);
-                            } else {
-                                setTimeout(_ => {
-                                    res.status(201).sendFile(__dirname + "/" + imgfile.processedpath)
-                                }, 2000)
-                            }
-                        })
-                        .on('end', (err) => {
-                            console.log("End Processing, unlink stored files");
-                            if (err) {
-                                console.error("Error on Processing end ", err);
-                            }
 
-                            fs.unlinkSync(imgfile.serverpath, err => {
-                                if (err) console.error(err);
-                                console.log('File deleted!');
-                            });
 
-                            if (fs.existsSync(__dirname + "/" + imgfile.processedpath)) {
-                                fs.unlinkSync(imgfile.processedpath, err => {
-                                    if (err) console.error(err);
-                                    console.log('File deleted!');
-                                });
-                            }
-                        });
+                    lib.processImage(imgfile.serverpath, oplist, imgfile.processedpath);
+
+                    fileh.isFileReady(imgfile.processedpath, (filename) => {
+                        console.log('image resizing and manipulation is complete');
+
+                        // if (fs.existsSync(__dirname + "/" + filename)) {
+                            res.status(201).sendFile(__dirname + "/" + filename);
+
+                            // res.end(() => {
+
+                                // console.log("End Processing, unlink stored files");
+                                // fs.unlinkSync(imgfile.serverpath, err => {
+                                //     if (err) console.error(err);
+                                //     console.log('File deleted!');
+                                // });
+                                fileh.deleteFile(imgfile.serverpath);
+                                fileh.deleteFile(imgfile.processedpath);
+
+                                // if (fs.existsSync(__dirname + "/" + imgfile.processedpath)) {
+                                //     fs.unlinkSync(imgfile.processedpath, err => {
+                                //         if (err) console.error(err);
+                                //         console.log('File deleted!');
+                                //     });
+                                // }
+                            // })
+                        // }
+                    });
+                    // .on('finish', (err) => {
+                    //     console.log("Finish Processing");
+                    //     if (err) {
+                    //         console.error(err);
+                    //         res.status(500).send("Server Error");
+                    //     }
+
+
+                    // })
+                    // .on('end', (err) => {
+                    //     if (err)
+                    //         console.error("Error on Processing end ", err);
+                    // });
                 });
             });
 
