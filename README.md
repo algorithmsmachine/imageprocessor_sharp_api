@@ -2,6 +2,7 @@
 
 Stateless image processing Service 
 
+![solution overview](screenshots/Image%20processor%20CnC.jpg)
 
 ## Overview 
 Receive an image in one of the acceptable image formats. 
@@ -23,6 +24,15 @@ Return the processed image and delete any server side copies of original and pro
 http://localhost:3000/image?resize=400,300&greyscale=1&rotate=60
 
 http://localhost:3000/image?thumbail=&rotate=70&resize=200,400&greyscale
+
+exmaple 1 :
+
+![sample output](screenshots/plateaus.jpg)
+
+
+example 2 :
+
+![sample output](screenshots/dog.png)
 
 ### Swagger 
 
